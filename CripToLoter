@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotería</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Lotería</h1>
+        <p>Elige un número del 1 al 100 y espera a que el bolillero seleccione el ganador.</p>
+        <div class="input-container">
+            <input type="number" id="bet" min="1" max="100" placeholder="Tu número">
+            <button id="apostar">Apostar</button>
+        </div>
+        <div id="bolillero" class="bolillero">
+            <span id="bolilla">--</span>
+        </div>
+        <p id="mensaje"></p>
+        <p id="contador">Tiempo restante: 2:00</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.game-container {
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.input-container {
+    margin: 20px 0;
+}
+
+input {
+    padding: 10px;
+    width: 60%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.bolillero {
+    width: 100px;
+    height: 100px;
+    background-color: #ff6f61;
+    border-radius: 50%;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+}
+
+#mensaje {
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+#contador {
+    font-size: 16px;
+    color: #555;
+}   
+
+
+let apuestas = [];
+let tiempoRestante = 120; // 2 minutos en segundos
+let intervaloContador;
+let intervaloBolillero;
+const betInput = document.getElementById('bet');
+const apostarButton = document.getElementById('apostar');
+const bolillero = document.getElementById('bolillero');
+const bolilla = document.getElementById('bolilla');
+const mensaje = document.getElementById('mensaje');
+const contador = document.getElementById('contador');
+
+// Función para iniciar el contador
+function iniciarContador() {
+    intervaloContador = setInterval(() => {
+        tiempoRestante--;
+        const minutos = Math.floor(tiempoRestante / 60);
+        const segundos = tiempoRestante % 60;
+        contador.textContent = `Tiempo restante: ${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
+
+        if (tiempoRestante <= 0) {
+            clearInterval(intervaloContador);
+            iniciarBolillero();
+        }
+    }, 1000);
+}
+
+// Función para iniciar el bolillero
+function iniciarBolillero() {
+    apostarButton.disabled = true;
+    betInput.disabled = true;
+    mensaje.textContent = "¡El bolillero está en marcha!";
+
+    let intentos = 0;
+    intervaloBolillero = setInterval(() => {
+        const numeroAleatorio = Math.floor(Math.random() * 100) + 1;
+        bolilla.textContent = numeroAleatorio;
+
+        if (intentos >= 20) { // Después de 20 intentos, selecciona el ganador
+            clearInterval(intervaloBolillero);
+            const ganador = numeroAleatorio;
+            bolilla.textContent = ganador;
+            mensaje.textContent = `¡El número ganador es ${ganador}!`;
+
+            if (apuestas.includes(ganador)) {
+                mensaje.textContent += ` ¡Felicidades, alguien ganó!`;
+            } else {
+                mensaje.textContent += ` Nadie acertó. ¡Mejor suerte la próxima vez!`;
+            }
+        }
+        intentos++;
+    }, 200); // Cambia el número cada 200 ms
+}
+
+// Evento para apostar
+apostarButton.addEventListener('click', () => {
+    const numero = parseInt(betInput.value);
+    if (numero >= 1 && numero <= 100) {
+        apuestas.push(numero);
+        mensaje.textContent = `Apuesta registrada: ${numero}`;
+        betInput.value = '';
+    } else {
+        mensaje.textContent = "Por favor, elige un número válido (1-100).";
+    }
+});
+
+// Iniciar el contador al cargar la página
+window.onload = iniciarContador;
+
+  
